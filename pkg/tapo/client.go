@@ -11,7 +11,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"math"
 	"mime/multipart"
 	"net"
 	"net/http"
@@ -187,9 +186,9 @@ func (c *Client) Move(pan, tilt float64) error {
 		return nil
 	}
 
-	direction := int(90 - 180*math.Atan2(tilt, pan)/math.Pi)
-	if direction < 0 {
-		direction += 360
+	axis := "x"
+	if tilt != 0 {
+		axis = "y"
 	}
 
 	host := c.url.Hostname()
@@ -206,7 +205,25 @@ func (c *Client) Move(pan, tilt float64) error {
 		password = controlPassword
 	}
 
-	return newControlClient(host, username, password).Move(direction)
+	return newControlClient(host, username, password).Move(axis)
+}
+
+func (c *Client) StopMove() error {
+	host := c.url.Hostname()
+	username := c.url.User.Username()
+	password, _ := c.url.User.Password()
+	if c.url.Scheme == "tapo" && password == "" {
+		password = username
+		username = "admin"
+	}
+	if controlUsername := c.url.Query().Get("control_username"); controlUsername != "" {
+		username = controlUsername
+	}
+	if controlPassword := c.url.Query().Get("control_password"); controlPassword != "" {
+		password = controlPassword
+	}
+
+	return newControlClient(host, username, password).Stop()
 }
 
 // Handle - first run will be in probe state

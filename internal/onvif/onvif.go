@@ -166,6 +166,17 @@ func onvifDeviceService(w http.ResponseWriter, r *http.Request) {
 		}
 
 	case onvif.PTZStop:
+		name := onvif.FindTagValue(b, "ProfileToken")
+		stream := streams.Get(name)
+		if stream == nil {
+			http.Error(w, "unknown profile", http.StatusBadRequest)
+			return
+		}
+		if err = stream.StopPTZ(); err != nil {
+			log.Warn().Err(err).Str("stream", name).Msg("[onvif] PTZ stop")
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
 		b = onvif.GetPTZStopResponse()
 
 	case onvif.DeviceGetCapabilities:

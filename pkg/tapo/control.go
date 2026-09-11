@@ -53,14 +53,20 @@ func newControlClient(host, username, password string) *controlClient {
 	}
 }
 
-func (c *controlClient) Move(direction int) error {
+func (c *controlClient) Move(axis string) error {
+	return c.command(fmt.Sprintf(`{"method":"multipleRequest","params":{"requests":[{"method":"cruiseMove","params":{"motor":{"cruise":{"coord":"%s"}}}}]}}`, axis))
+}
+
+func (c *controlClient) Stop() error {
+	return c.command(`{"method":"multipleRequest","params":{"requests":[{"method":"cruiseStop","params":{"motor":{"cruise_stop":{}}}}]}}`)
+}
+
+func (c *controlClient) command(request string) error {
 	stok, seq, key, iv, hash, cnonce, err := c.login()
 	if err != nil {
 		return err
 	}
-
-	request := []byte(fmt.Sprintf(`{"method":"multipleRequest","params":{"requests":[{"method":"relativeMove","params":{"motor":{"movestep":{"direction":"%03d"}}}}]}}`, direction))
-	return c.request(stok, seq, key, iv, hash, cnonce, request)
+	return c.request(stok, seq, key, iv, hash, cnonce, []byte(request))
 }
 
 func (c *controlClient) login() (string, int, []byte, []byte, string, string, error) {
