@@ -71,6 +71,7 @@ type Consumer interface {
 
 type PTZ interface {
 	Move(pan, tilt float64) error
+	StopMove() error
 }
 
 // LifetimeLimited is an optional interface for Producers whose upstream

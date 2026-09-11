@@ -106,6 +106,33 @@ func (s *Stream) Move(pan, tilt float64) error {
 	return errors.New("streams: PTZ not supported")
 }
 
+func (s *Stream) StopPTZ() error {
+	if s.control != "" {
+		control := Get(s.control)
+		if control == nil {
+			return errors.New("streams: control stream not found")
+		}
+		return control.StopPTZ()
+	}
+
+	var lastErr error
+	for _, prod := range s.producers {
+		if err := prod.Dial(); err != nil {
+			lastErr = err
+			continue
+		}
+		if err := prod.StopPTZ(); err == nil {
+			return nil
+		} else {
+			lastErr = err
+		}
+	}
+	if lastErr != nil {
+		return lastErr
+	}
+	return errors.New("streams: PTZ not supported")
+}
+
 func (s *Stream) RemoveConsumer(cons core.Consumer) {
 	_ = cons.Stop()
 
