@@ -186,9 +186,13 @@ func (c *Client) Move(pan, tilt float64) error {
 		return nil
 	}
 
-	axis := "x"
-	if tilt != 0 {
-		axis = "y"
+	panStep := int(pan * 20)
+	tiltStep := int(tilt * 20)
+	if panStep == 0 && pan != 0 {
+		panStep = 1
+	}
+	if tiltStep == 0 && tilt != 0 {
+		tiltStep = 1
 	}
 
 	host := c.url.Hostname()
@@ -205,7 +209,7 @@ func (c *Client) Move(pan, tilt float64) error {
 		password = controlPassword
 	}
 
-	return newControlClient(host, username, password).Move(axis)
+	return newControlClient(host, username, password).Move(panStep, tiltStep)
 }
 
 func (c *Client) StopMove() error {
