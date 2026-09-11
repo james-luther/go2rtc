@@ -53,12 +53,12 @@ func newControlClient(host, username, password string) *controlClient {
 	}
 }
 
-func (c *controlClient) Move(axis string) error {
-	return c.command(fmt.Sprintf(`{"method":"multipleRequest","params":{"requests":[{"method":"cruiseMove","params":{"motor":{"cruise":{"coord":"%s"}}}}]}}`, axis))
+func (c *controlClient) Move(pan, tilt int) error {
+	return c.command(fmt.Sprintf(`{"method":"multipleRequest","params":{"requests":[{"method":"motorMove","params":{"motor":{"move":{"x_coord":"%d","y_coord":"%d"}}}}]}}`, pan, tilt))
 }
 
 func (c *controlClient) Stop() error {
-	return c.command(`{"method":"multipleRequest","params":{"requests":[{"method":"cruiseStop","params":{"motor":{"cruise_stop":{}}}}]}}`)
+	return nil
 }
 
 func (c *controlClient) command(request string) error {
