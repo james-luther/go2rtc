@@ -199,6 +199,12 @@ func (c *Client) Move(pan, tilt float64) error {
 		password = username
 		username = "admin"
 	}
+	if controlUsername := c.url.Query().Get("control_username"); controlUsername != "" {
+		username = controlUsername
+	}
+	if controlPassword := c.url.Query().Get("control_password"); controlPassword != "" {
+		password = controlPassword
+	}
 
 	return newControlClient(host, username, password).Move(direction)
 }
